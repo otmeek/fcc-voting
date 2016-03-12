@@ -31,6 +31,7 @@
     "mongodb": "^2.1.7",
     "mongoose": "^4.1.0",
     "passport": "^0.3.0",
-    "passport-github": "^1.0.0"
+    "passport-github": "^1.0.0",
+    "randomstring": "^1.1.4"
   }
 }

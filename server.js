@@ -8,7 +8,8 @@ var randomstring = require('randomstring');
 var app = express();
 require('dotenv').load();
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(__dirname + '/public'));
+app.use('/polls', express.static(__dirname + '/public'))
 app.set('view engine', 'jade');
 
 app.get('/', function(req, res) {
@@ -28,13 +29,18 @@ app.get('/', function(req, res) {
     });
 });
 
+app.get('/polls/create', function(req, res) {
+    res.render('create');
+});
+
 app.get('/polls/:STRING', function(req, res) {
     var str = req.params.STRING;
-    console.log(str);
+    // logic here
     res.redirect('/');
 });
 
 app.get('/*', function(req, res) {
+    // redirect invalid paths to main page
     res.redirect('/');
 });
 

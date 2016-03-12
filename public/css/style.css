@@ -5,6 +5,8 @@ html, body {
     margin-top: 25px;
     font-family: 'Open Sans', sans-serif;
     background-color: #ccc;
+    height: 100%;
+    width: 100%;
 }
 
 h1, h2, h3, h4 {

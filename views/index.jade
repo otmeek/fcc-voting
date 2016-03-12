@@ -6,7 +6,7 @@ html
         meta(http-equiv='X-UA-Compatible', content='IE=edge')
         meta(name='viewport', content='width=device-width, initial-scale=1')
         
-        title= body.title
+        title= 'FreeCodeCamp basejump Build a Voting App'
         
         link(rel='stylesheet', href='css/bootstrap.min.css')
         link(rel='stylesheet', href='css/style.css')
@@ -38,12 +38,24 @@ html
                             a(href='#') Create
     
         div#main.container
-            h1= body.h1
-            p= 'This is a web app project created by otmeek'
-                a(href='http://www.freecodecamp.com/otmeek')
-                    i.fa.fa-fire.fa-fw
-                = ' as part of FreeCodeCamp\'s curriculum.'
-            p= 'Here you can vote on other users\' polls and create your own.'
+            div.jumbotron
+                div.row
+                    div.col-xs-12.col-sm-12.col-lg-3.icons
+                        i.fa.fa-bar-chart
+                    div.col-xs-12.col-sm-12.col-lg-9
+                        h1= 'fcc-voting'
+                        p= 'This is a web app project created by otmeek'
+                            a(href='http://www.freecodecamp.com/otmeek')
+                                i.fa.fa-fire.fa-fw
+                            = ' as part of '
+                            a(href='http://www.freecodecamp.com/') FreeCodeCamp
+                            = '\'s curriculum, with help from the awesome FCC community!'
+                        p= 'Here you can vote on other users\' polls and create your own.'
+            
+            h3 Latest polls
+            div.list-group
+                each i in data
+                    a.list-group-item(href=i.url)= i.title
             
         script(src='js/jquery.min.js')
         script(src='js/bootstrap.min.js')

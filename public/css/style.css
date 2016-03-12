@@ -18,6 +18,19 @@ h1, h2, h3, h4 {
     text-align: center;
 }
 
+.icons {
+    font-size: 65pt;
+    color: #aaa;
+}
+
+@media only screen and (min-width: 1200px) {
+    .jumbotron { text-align: right }
+    .icons { 
+        padding-top: 50px;
+        font-size: 100pt;
+    }
+}
+
 .inverse-dropdown{
     background-color: #222;
     border-color: #080808;
@@ -34,4 +47,12 @@ h1, h2, h3, h4 {
 
 .inverse-dropdown li .divider {
     background-color: #000;
+}
+
+.list-group-item {
+    font-weight: bold;
+}
+
+.list-group-item:hover {
+    color: #337ab7 !important;
 }

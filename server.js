@@ -77,7 +77,7 @@ app.post('/polls/create', function(req, res) {
             var obj = {
                 pollSubmitted: true,
                 poll: {
-                    url: process.env.APP_URL + doc.url
+                    url: process.env.APP_URL + doc.url.substr(1)
                 }
             }
             res.render('create', obj);

@@ -16,7 +16,7 @@ app.get('/', function(req, res) {
     
     var polls = {};
     
-    mongo.connect('mongodb://localhost:27017/fccvote', function(err, db) {
+    mongo.connect(process.env.MONGOLAB_URI, function(err, db) {
        if(err) throw err; 
         
         var collection = db.collection('polls');

@@ -82,3 +82,9 @@ h1, h2, h3, h4 {
 .btnLabel {
     width: 200px;
 }
+
+.pollSuccess {
+    margin-top: 70px;
+    font-size: 14pt;
+    font-weight: 300;
+}

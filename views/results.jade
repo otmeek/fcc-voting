@@ -1,0 +1,48 @@
+doctype html
+html
+
+    include ./head.jade
+        
+    body
+    
+        include ./navbar.jade
+    
+        div#main.container
+            h1.createH1 Poll results
+                br
+                small "
+                    = poll.title
+                    | "
+            div.row.results
+                div.col-sm-8.col-xd-12.chart
+                    canvas#resultsChart(width='400', height='400')
+                div.col-sm-4.col-xs-12
+                    div.choices
+                        h3
+                            = poll.totalVotes
+                            |  total 
+                            if poll.totalVotes === 1
+                                | vote
+                            else
+                                | votes
+                        h4 Choices
+                        ul.list-unstyled
+                            each choice, index in poll.choices
+                                li
+                                    = index+1
+                                    | . 
+                                    strong= choice
+                                    |  - 
+                                    if poll['choice' + index]
+                                        = poll['choice' + index]
+                                    else
+                                        | 0
+                                    if poll['choice' + index] === 1
+                                        |  vote
+                                    else
+                                        |  votes
+                        
+
+        include ./scripts.jade
+        script(src='js/Chart.js')
+        script(src='js/results.js')

@@ -8,14 +8,16 @@ $(document).ready(function() {
 });
 
 function addNewOption(option) {
-    console.log(option)
-    // append new option
-    var newOption =
-        '<div class="form-group row">' +
-            '<label class="col-sm-3 form-control-label" for="txtChoice' + option + '">Option</label>' +
-            '<div class="col-sm-9">' +
-                '<input id="txtChoice' + option + '" name="choice' + option + '" class="form-control" type="text" placeholder="Your poll option" />' +
-            '</div>' +
-        '</div>';
-    $('.optAdd').prev().after(newOption);
+    // max 10 options
+    if(option <= 10) {
+        // append new option
+        var newOption =
+            '<div class="form-group row">' +
+                '<label class="col-sm-3 form-control-label" for="txtChoice' + option + '">Option</label>' +
+                '<div class="col-sm-9">' +
+                    '<input id="txtChoice' + option + '" name="choice' + option + '" class="form-control" type="text" placeholder="Your poll option" />' +
+                '</div>' +
+            '</div>';
+        $('.optAdd').prev().after(newOption);
+    }
 }

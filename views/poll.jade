@@ -10,14 +10,19 @@ html
         div#main.container
             h1.createH1= poll.title
             p Choose from the options below.
-            form.voteForm
+            form.voteForm(action=poll.url+'/vote', method='post')
                 div.form-group.row
                     label.col-sm-12.form-control-label.text-center Options
                     div.col-sm-12
                         each choice, index in poll.choices
                             div.radio
                                 label
-                                    input(type='radio', name='choice'+index)
+                                    input(type='radio', name='choice', value='choice'+index)
                                     = choice
+                        div.btn-vote.text-center
+                            label.btn.btn-primary.btnLabel(for='submit')
+                                i.fa.fa-check-square-o
+                                |  Vote
+                            input#submit.hidden(type='submit')
             
         include ./scripts.jade

@@ -100,3 +100,16 @@ h1, h2, h3, h4 {
     line-height: 24pt;
     font-weight: 300;
 }
+
+.btn-vote {
+    margin-top: 70px;
+}
+
+.results {
+    margin-top: 70px;
+}
+.choices {
+    width: 30%;
+    text-align: left;
+    padding-top: 50px;
+}

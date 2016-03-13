@@ -46,7 +46,8 @@ app.get('/polls/create', function(req, res) {
 app.post('/polls/create', function(req, res) {
     console.log(req.body);
     var doc = {
-        title: req.body.title
+        title: req.body.title,
+        totalVotes: 0
     };
     var choices = [];
     for (var prop in req.body) {
@@ -58,8 +59,6 @@ app.post('/polls/create', function(req, res) {
     }
     
     doc.choices = choices;
-    
-    console.log(doc);
     
     mongo.connect(process.env.MONGOLAB_URI, function(err, db) {
         if(err) throw err; 
@@ -111,8 +110,49 @@ app.get('/polls/:STRING/vote', function(req, res) {
             var obj = {
                 poll: docs[0]
             };
-            console.log(obj);
             res.render('poll', obj);
+            db.close();
+        });
+    });
+});
+
+app.post('/polls/:STRING/vote', function(req, res) {
+    var str = req.params.STRING;
+    var vote = req.body;
+    
+    var key = req.body.choice;
+    var voteObj = {};
+    voteObj[key] = 1;
+    voteObj.totalVotes = 1;
+    
+    mongo.connect(process.env.MONGOLAB_URI, function(err, db) {
+        if (err) throw err;
+        var collection = db.collection('polls');
+        collection.update({
+            url: '/polls/' + str
+        }, {
+            $inc: voteObj
+        }, function(err) {
+            if(err) throw err;
+            // redirect to results page
+            res.redirect('/polls/' + str + '/results');
+            db.close();
+        });
+    });
+});
+
+app.get('/polls/:STRING/results', function(req, res) {
+    var str = req.params.STRING;
+    var obj = {};
+    mongo.connect(process.env.MONGOLAB_URI, function(err, db) {
+        if(err) throw err;
+        var collection = db.collection('polls');
+        collection.find({
+            url: '/polls/' + str
+        }).toArray(function(err, doc) {
+            obj.poll = doc[0];
+            console.log(obj);
+            res.render('results', obj);
             db.close();
         });
     });

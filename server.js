@@ -10,7 +10,8 @@ var app = express();
 require('dotenv').load();
 
 app.use(express.static(__dirname + '/public'));
-app.use('/polls', express.static(__dirname + '/public'))
+app.use('/polls', express.static(__dirname + '/public'));
+app.use('/polls/:STRING', express.static(__dirname + '/public'));
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     extended: false
 }));
@@ -42,14 +43,23 @@ app.get('/polls/create', function(req, res) {
     res.render('create', obj);
 });
 
-app.get('/polls/:STRING', function(req, res) {
-    var str = req.params.STRING;
-    // logic here
-    res.redirect('/');
-});
-
 app.post('/polls/create', function(req, res) {
-    var doc = req.body;
+    console.log(req.body);
+    var doc = {
+        title: req.body.title
+    };
+    var choices = [];
+    for (var prop in req.body) {
+        if (req.body.hasOwnProperty(prop)) {
+            if (prop.substr(0, 6) == 'choice' && req.body[prop] != '') {
+                choices.push(req.body[prop])
+            }
+        }
+    }
+    
+    doc.choices = choices;
+    
+    console.log(doc);
     
     mongo.connect(process.env.MONGOLAB_URI, function(err, db) {
         if(err) throw err; 
@@ -86,6 +96,34 @@ app.post('/polls/create', function(req, res) {
     });
     
     
+});
+
+app.get('/polls/:STRING/vote', function(req, res) {
+    var str = req.params.STRING;
+    
+    mongo.connect(process.env.MONGOLAB_URI, function(err, db) {
+        if(err) throw err;
+        var collection = db.collection('polls');
+        collection.find({
+            url: /polls/ + str
+        }).toArray(function(err, docs) {
+            if(err) throw err;
+            var obj = {
+                poll: docs[0]
+            };
+            console.log(obj);
+            res.render('poll', obj);
+            db.close();
+        });
+    });
+});
+
+app.get('/polls/:STRING', function(req, res) {
+    var urlStr = req.params.STRING;
+    // check if use has voted
+    // if yes, redirect to results
+    // else, redirect to vote page
+    res.redirect('/polls/' + urlStr + '/vote');
 })
 
 app.get('/*', function(req, res) {

@@ -88,3 +88,15 @@ h1, h2, h3, h4 {
     font-size: 14pt;
     font-weight: 300;
 }
+
+.voteForm {
+    width: 40%;
+    margin: 50px auto;
+    text-align: left;
+}
+
+.voteForm label {
+    font-size: 14pt;
+    line-height: 24pt;
+    font-weight: 300;
+}

@@ -1,0 +1,23 @@
+doctype html
+html
+
+    include ./head.jade
+        
+    body
+    
+        include ./navbar.jade
+    
+        div#main.container
+            h1.createH1= poll.title
+            p Choose from the options below.
+            form.voteForm
+                div.form-group.row
+                    label.col-sm-12.form-control-label.text-center Options
+                    div.col-sm-12
+                        each choice, index in poll.choices
+                            div.radio
+                                label
+                                    input(type='radio', name='choice'+index)
+                                    = choice
+            
+        include ./scripts.jade

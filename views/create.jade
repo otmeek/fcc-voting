@@ -1,46 +1,31 @@
 doctype html
 html
 
-    head
-    
-        meta(charset='utf-8')
-        meta(http-equiv='X-UA-Compatible', content='IE=edge')
-        meta(name='viewport', content='width=device-width, initial-scale=1')
-        
-        title= 'FreeCodeCamp basejump Build a Voting App'
-        
-        link(rel='stylesheet', href='css/bootstrap.min.css')
-        link(rel='stylesheet', href='css/style.css')
-        link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css')
+    include ./head.jade
         
     body
     
-        nav.navbar.navbar-inverse.navbar-fixed-top(role='navigation')
-            div.container
-                div.navbar-header
-                    button.navbar-toggle.collapsed(data-toggle='collapse', data-target='#navbar', aria-expanded='false', aria-controls='navbar')
-                        span.sr-only Toggle navigation
-                        span.icon-bar
-                        span.icon-bar
-                        span.icon-bar
-                div#navbar.navbar-collapse.collapse
-                    ul.nav.navbar-nav.pull-right
-                        li.active
-                            a(href='#') Home
-                        li.dropdown
-                            a.dropdown-toggle(href='#', data-toggle='dropdown', role='button', aria-haspopup='true', aria-expanded='false') User 
-                                span.caret
-                            ul.dropdown-menu.inverse-dropdown
-                                li
-                                    a(href='#') Sign in
-                                li
-                                    a(href='#') Sign up
-                        li
-                            a(href='#') Create
+        include ./navbar.jade
     
         div#main.container
-            h1 Title
-            p text
+            h1.createH1 Create a poll
+            form.createForm
+                div.form-group.row
+                    label.col-sm-3.form-control-label(for='txtQuestion') Question
+                    div.col-sm-9
+                        input#txtQuestion.form-control(type='text', placeholder='Your poll question')
+                div.form-group.row
+                    label.col-sm-3.form-control-label(for='txtChoice1') Option
+                    div.col-sm-9
+                        input#txtChoice1.form-control(type='text', placeholder='Your poll option')
+                div.form-group.row.optAdd
+                    div.col-sm-6.col-sm-offset-6
+                        p 
+                            a#addOption(href='#') + Add another option
+                label.btn.btn-primary.btnLabel(for='submit')
+                    i.fa.fa-check-square-o
+                    |  Submit
+                input#submit.hidden(type='submit')
             
-        script(src='js/jquery.min.js')
-        script(src='js/bootstrap.min.js')
+        include ./scripts.jade
+        script(src='js/create.js')

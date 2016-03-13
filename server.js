@@ -23,6 +23,7 @@ app.get('/', function(req, res) {
         var data = collection.find().toArray(function(err, docs) {
             if(err) throw err;
             polls.data = docs;
+            polls.currentPage = 'Home'
             res.render('index', polls);
             db.close();
         });
@@ -30,7 +31,10 @@ app.get('/', function(req, res) {
 });
 
 app.get('/polls/create', function(req, res) {
-    res.render('create');
+    var obj = {
+        currentPage: 'Create'
+    }
+    res.render('create', obj);
 });
 
 app.get('/polls/:STRING', function(req, res) {

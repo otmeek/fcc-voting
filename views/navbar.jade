@@ -1,0 +1,30 @@
+nav.navbar.navbar-inverse.navbar-fixed-top(role='navigation')
+    div.container
+        div.navbar-header
+            button.navbar-toggle.collapsed(data-toggle='collapse', data-target='#navbar', aria-expanded='false', aria-controls='navbar')
+                span.sr-only Toggle navigation
+                span.icon-bar
+                span.icon-bar
+                span.icon-bar
+        div#navbar.navbar-collapse.collapse
+            ul.nav.navbar-nav.pull-right
+                if currentPage === 'Home'
+                    li.active
+                        a(href='/') Home
+                else
+                    li
+                        a(href='/') Home
+                li.dropdown
+                    a.dropdown-toggle(href='#', data-toggle='dropdown', role='button', aria-haspopup='true', aria-expanded='false') User 
+                        span.caret
+                    ul.dropdown-menu.inverse-dropdown
+                        li
+                            a(href='#') Sign in
+                        li
+                            a(href='#') Sign up
+                if currentPage === 'Create'
+                    li.active
+                        a(href='/polls/create') Create
+                else
+                    li
+                        a(href='/polls/create') Create

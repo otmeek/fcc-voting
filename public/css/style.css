@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,300');
 @import url('https://fonts.googleapis.com/css?family=Slabo+27px');
     
 html, body {
@@ -58,4 +58,27 @@ h1, h2, h3, h4 {
 .list-group-item:hover {
     color: #337ab7 !important;
     text-decoration: underline !important;
+}
+
+.createForm {
+    width: 60%;
+    margin: 50px auto;
+}
+
+.createForm label {
+    font-size: 14pt;
+    line-height: 24pt;
+    font-weight: 300;
+}
+
+.optAdd {
+    text-align: right;
+}
+
+.createH1 {
+    margin-top: 70px;
+}
+
+.btnLabel {
+    width: 200px;
 }

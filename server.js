@@ -1,10 +1,12 @@
 'use strict';
 
-var express = require('express');
-var mongo = require('mongodb').MongoClient;
-var path = require('path');
+var express      = require('express');
+var mongo        = require('mongodb').MongoClient;
+var path         = require('path');
 var randomstring = require('randomstring');
-var bodyParser = require('body-parser');
+var bodyParser   = require('body-parser');
+var os           = require('os');
+var ifaces       = os.networkInterfaces();
 
 var app = express();
 require('dotenv').load();
@@ -103,17 +105,59 @@ app.get('/polls/:STRING/vote', function(req, res) {
     mongo.connect(process.env.MONGOLAB_URI, function(err, db) {
         if(err) throw err;
         var collection = db.collection('polls');
+        
+        
+        // if user has voted, redirect to results page
+        var ip = getIp();
         collection.find({
-            url: /polls/ + str
+            url: '/polls/' + str,
+            hasVoted: {
+                $in: ip
+            }
         }).toArray(function(err, docs) {
             if(err) throw err;
-            var obj = {
-                poll: docs[0]
-            };
-            res.render('poll', obj);
-            db.close();
+            if(docs.length>0) {
+                res.redirect('/polls/' + str + '/results');
+                db.close();
+            }
+            else {
+                collection.find({
+                    url: /polls/ + str
+                }).toArray(function(err, docs) {
+                    if(err) throw err;
+                    var obj = {
+                        poll: docs[0]
+                    };
+                    res.render('poll', obj);
+                    db.close();
+                });
+            }
         });
     });
+    
+    function getIp() {
+        var ips = [];
+        Object.keys(ifaces).forEach(function (ifname) {
+          var alias = 0;
+
+          ifaces[ifname].forEach(function (iface) {
+            if ('IPv4' !== iface.family || iface.internal !== false) {
+              // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
+              return;
+            }
+
+            if (alias >= 1) {
+              // this single interface has multiple ipv4 addresses
+            } else {
+              // this interface has only one ipv4 adress
+              ips.push(iface.address);
+            }
+            ++alias;
+          });
+        });
+        
+        return ips;
+    }
 });
 
 app.post('/polls/:STRING/vote', function(req, res) {
@@ -131,7 +175,12 @@ app.post('/polls/:STRING/vote', function(req, res) {
         collection.update({
             url: '/polls/' + str
         }, {
-            $inc: voteObj
+            $inc: voteObj,
+            $push: {
+                hasVoted: {
+                    $each: getIp()
+                }
+            }
         }, function(err) {
             if(err) throw err;
             // redirect to results page
@@ -139,6 +188,32 @@ app.post('/polls/:STRING/vote', function(req, res) {
             db.close();
         });
     });
+    
+    function getIp() {
+        var ips = [];
+        Object.keys(ifaces).forEach(function (ifname) {
+          var alias = 0;
+
+          ifaces[ifname].forEach(function (iface) {
+            if ('IPv4' !== iface.family || iface.internal !== false) {
+              // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
+              return;
+            }
+
+            if (alias >= 1) {
+              // this single interface has multiple ipv4 addresses
+              ips.push(iface.address);
+            } else {
+              // this interface has only one ipv4 adress
+              ips.push(iface.address);
+            }
+            ++alias;
+          });
+        });
+        
+        return ips;
+    }
+    
 });
 
 app.get('/polls/:STRING/results', function(req, res) {
@@ -151,7 +226,6 @@ app.get('/polls/:STRING/results', function(req, res) {
             url: '/polls/' + str
         }).toArray(function(err, doc) {
             obj.poll = doc[0];
-            console.log(obj);
             res.render('results', obj);
             db.close();
         });
@@ -160,11 +234,27 @@ app.get('/polls/:STRING/results', function(req, res) {
 
 app.get('/polls/:STRING', function(req, res) {
     var urlStr = req.params.STRING;
-    // check if use has voted
+    // check if user or ip has voted
     // if yes, redirect to results
     // else, redirect to vote page
     res.redirect('/polls/' + urlStr + '/vote');
-})
+});
+
+app.get('/data', function(req, res) {
+    var query = req.query;
+    mongo.connect(process.env.MONGOLAB_URI, function(err, db) {
+    
+        var collection = db.collection('polls');
+        collection.find({
+            url: query.url
+        }).toArray(function(err, doc) {
+            res.json(doc);
+            db.close();
+        });
+    
+    });
+    
+});
 
 app.get('/*', function(req, res) {
     // redirect invalid paths to main page

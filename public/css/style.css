@@ -109,7 +109,12 @@ h1, h2, h3, h4 {
     margin-top: 70px;
 }
 .choices {
-    width: 30%;
+
     text-align: left;
-    padding-top: 50px;
+}
+
+canvas{
+    width: 100% !important;
+    max-width: 400px;
+    height: auto !important;
 }

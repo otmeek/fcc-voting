@@ -4,29 +4,35 @@ $(document).ready(function() {
     // This will get the first returned node in the jQuery collection.
     var resultsChart = new Chart(ctx); 
     
-    var data = [
-        {
-            value: 300,
-            color:"#F7464A",
-            highlight: "#FF5A5E",
-            label: "Red"
-        },
-        {
-            value: 50,
-            color: "#46BFBD",
-            highlight: "#5AD3D1",
-            label: "Green"
-        },
-        {
-            value: 100,
-            color: "#FDB45C",
-            highlight: "#FFC870",
-            label: "Yellow"
-        }
-    ]
+    var data = [];
     
-    // to do
-    // write $.get that gets data json
+    var colours = [
+        '#F7464A',
+        '#46BFBD',
+        '#FFC870',
+        '#4D5360',
+        '#A36EB5',
+        '#63AD77',
+        '#949FB1',
+        '#FF75B3',
+        '#4DC99F',
+        '#6EE6E0'
+    ];
+    
+    $('.choice').each(function() {
+        var obj = {};
+        obj.value = $(this).find('.cVotes').text();
+        obj.label = $(this).find('.cName').text();
+        var index = parseInt($(this).find('.cIndex').text());
+        obj.color = colours[index-1];
+        data.push(obj);
+    });
+    
+    var options = {
+        scaleFontFamily: "''Open Sans', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+        responsive: true,
+        maintainAspectRatio: true
+    }
     
     var myPieChart = new Chart(ctx).Pie(data);
 });

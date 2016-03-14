@@ -25,6 +25,6 @@ html
             h2 Latest polls
             div.list-group
                 each i in data
-                    a.list-group-item(href=i.url)= i.title
+                    a.list-group-item(href=i.url + '/vote')= i.title
             
         include ./scripts.jade

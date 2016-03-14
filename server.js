@@ -111,7 +111,7 @@ app.get('/polls/:STRING/vote', function(req, res) {
         
         
         // if user has voted, redirect to results page
-        var ip = [req.ip];
+        var ip = [req.headers['x-forwarded-for']];
         collection.find({
             url: '/polls/' + str,
             hasVoted: {
@@ -163,7 +163,7 @@ app.post('/polls/:STRING/vote', function(req, res) {
             $inc: voteObj,
             $push: {
                 hasVoted: {
-                    $each: [req.ip]
+                    $each: [request.headers['x-forwarded-for']]
                 }
             }
         }, function(err) {

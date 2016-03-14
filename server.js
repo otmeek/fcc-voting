@@ -51,7 +51,8 @@ app.post('/polls/create', function(req, res) {
     console.log(req.body);
     var doc = {
         title: req.body.title,
-        totalVotes: 0
+        totalVotes: 0,
+        hasVoted: []
     };
     var choices = [];
     for (var prop in req.body) {
@@ -110,7 +111,7 @@ app.get('/polls/:STRING/vote', function(req, res) {
         
         
         // if user has voted, redirect to results page
-        var ip = getIp();
+        var ip = [req.ip];
         collection.find({
             url: '/polls/' + str,
             hasVoted: {
@@ -119,10 +120,15 @@ app.get('/polls/:STRING/vote', function(req, res) {
         }).toArray(function(err, docs) {
             if(err) throw err;
             if(docs.length>0) {
+                // if there is a result, then user has voted
+                console.log('has voted ' + JSON.stringify(docs))
+                // redirect to results page
                 res.redirect('/polls/' + str + '/results');
                 db.close();
             }
             else {
+                // user hasnt voted, render vote page
+                console.log('hasnt voted: ' + JSON.stringify(docs));
                 collection.find({
                     url: /polls/ + str
                 }).toArray(function(err, docs) {
@@ -136,30 +142,7 @@ app.get('/polls/:STRING/vote', function(req, res) {
             }
         });
     });
-    
-    function getIp() {
-        var ips = [];
-        Object.keys(ifaces).forEach(function (ifname) {
-          var alias = 0;
 
-          ifaces[ifname].forEach(function (iface) {
-            if ('IPv4' !== iface.family || iface.internal !== false) {
-              // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
-              return;
-            }
-
-            if (alias >= 1) {
-              // this single interface has multiple ipv4 addresses
-            } else {
-              // this interface has only one ipv4 adress
-              ips.push(iface.address);
-            }
-            ++alias;
-          });
-        });
-        
-        return ips;
-    }
 });
 
 app.post('/polls/:STRING/vote', function(req, res) {
@@ -180,7 +163,7 @@ app.post('/polls/:STRING/vote', function(req, res) {
             $inc: voteObj,
             $push: {
                 hasVoted: {
-                    $each: getIp()
+                    $each: [req.ip]
                 }
             }
         }, function(err) {
@@ -190,31 +173,7 @@ app.post('/polls/:STRING/vote', function(req, res) {
             db.close();
         });
     });
-    
-    function getIp() {
-        var ips = [];
-        Object.keys(ifaces).forEach(function (ifname) {
-          var alias = 0;
 
-          ifaces[ifname].forEach(function (iface) {
-            if ('IPv4' !== iface.family || iface.internal !== false) {
-              // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
-              return;
-            }
-
-            if (alias >= 1) {
-              // this single interface has multiple ipv4 addresses
-              ips.push(iface.address);
-            } else {
-              // this interface has only one ipv4 adress
-              ips.push(iface.address);
-            }
-            ++alias;
-          });
-        });
-        
-        return ips;
-    }
     
 });
 

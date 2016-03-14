@@ -163,7 +163,7 @@ app.post('/polls/:STRING/vote', function(req, res) {
             $inc: voteObj,
             $push: {
                 hasVoted: {
-                    $each: [request.headers['x-forwarded-for']]
+                    $each: [req.headers['x-forwarded-for']]
                 }
             }
         }, function(err) {

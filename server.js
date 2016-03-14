@@ -28,7 +28,9 @@ app.get('/', function(req, res) {
        if(err) throw err; 
         
         var collection = db.collection('polls');
-        var data = collection.find().toArray(function(err, docs) {
+        var data = collection.find().sort({
+            _id: -1
+        }).limit(50).toArray(function(err, docs) {
             if(err) throw err;
             polls.data = docs;
             polls.currentPage = 'Home'

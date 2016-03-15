@@ -67,7 +67,7 @@ app.post('/polls/create', passDb, function(req, res) {
         delete poll[p];
       }
     }
-         
+    
     var doc = {
         title: poll.title,
         totalVotes: 0,
@@ -77,6 +77,7 @@ app.post('/polls/create', passDb, function(req, res) {
     for (var prop in poll) {
         if (poll.hasOwnProperty(prop)) {
             if (prop.substr(0, 6) == 'choice' && poll[prop] != '') {
+                console.log(poll[prop])
                 choices.push(poll[prop])
             }
         }
@@ -161,27 +162,15 @@ app.post('/polls/:STRING/vote', passDb, function(req, res) {
     var voteObj = {};
     voteObj[key] = 1;
     voteObj.totalVotes = 1;
-    
-    if(vote.hasOwnProperty('newOption')) {
-        console.log(vote.hasOwnProperty('newOption'));
-    }
-    
     var pushObj = {
         hasVoted: {
             $each: [req.headers['x-forwarded-for']]
-        },
-        choices: {
-            $each: [vote.newOption]
         }
     }
     
-   
-    var collection = req.db.collection('polls');
-    collection.update({
-        url: '/polls/' + str
-    }, {
-        $inc: voteObj,
-        $push: {
+    if(vote.hasOwnProperty('newOption')) {
+        console.log(vote.hasOwnProperty('newOption'));
+        pushObj = {
             hasVoted: {
                 $each: [req.headers['x-forwarded-for']]
             },
@@ -189,6 +178,14 @@ app.post('/polls/:STRING/vote', passDb, function(req, res) {
                 $each: [vote.newOption]
             }
         }
+    }
+    
+    var collection = req.db.collection('polls');
+    collection.update({
+        url: '/polls/' + str
+    }, {
+        $inc: voteObj,
+        $push: pushObj
     }, function(err) {
         if(err) throw err;
         // redirect to results page

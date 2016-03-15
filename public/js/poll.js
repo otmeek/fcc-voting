@@ -24,6 +24,8 @@ function addCustomOption() {
             '</span>' +
         '</div>';
     $('#custom').after(customOption);
+    $('.btnLabel').addClass('disabled');
+    $('#submit').attr('disabled', true);
 }
 
 function removeCustomOption() {
@@ -48,5 +50,7 @@ function confirmCustomOption() {
             '</div>';
         $('#customOption').hide();
         $('.radioOpts').append(newOptionHtml);
+        $('.btnLabel').removeClass('disabled');
+        $('#submit').attr('disabled', false);
     }
 }

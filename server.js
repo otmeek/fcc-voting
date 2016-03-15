@@ -147,11 +147,25 @@ app.get('/polls/:STRING/vote', passDb, function(req, res) {
 app.post('/polls/:STRING/vote', passDb, function(req, res) {
     var str = req.params.STRING;
     var vote = req.body;
+    console.log(vote);
     
     var key = vote.choice;
     var voteObj = {};
     voteObj[key] = 1;
     voteObj.totalVotes = 1;
+    
+    if(vote.hasOwnProperty('newOption')) {
+        console.log(vote.hasOwnProperty('newOption'));
+    }
+    
+    var pushObj = {
+        hasVoted: {
+            $each: [req.headers['x-forwarded-for']]
+        },
+        choices: {
+            $each: [vote.newOption]
+        }
+    }
     
    
     var collection = req.db.collection('polls');

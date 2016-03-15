@@ -13,16 +13,21 @@ html
             form.voteForm(action=poll.url+'/vote', method='post')
                 div.form-group.row
                     label.col-sm-12.form-control-label.text-center Options
-                    div.col-sm-12
+                    div.col-sm-12.radioOpts
                         each choice, index in poll.choices
                             div.radio
                                 label
                                     input(type='radio', name='choice', value='choice'+index)
                                     = choice
-                        div.btn-vote.text-center
-                            label.btn.btn-primary.btnLabel(for='submit')
-                                i.fa.fa-check-square-o
-                                |  Vote
-                            input#submit.hidden(type='submit')
+                    div#custom.form-group.row
+                        span#addCustom.pull-right
+                            a(href='#') + Add custom option
+                    div.btn-vote.text-center
+                        label.btn.btn-primary.btnLabel(for='submit')
+                            i.fa.fa-check-square-o
+                            |  Vote
+                        input#submit.hidden(type='submit')
             
+        span#choiceList.hidden= poll.choices
         include ./scripts.jade
+        script(src='js/poll.js')

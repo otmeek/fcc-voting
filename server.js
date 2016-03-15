@@ -148,7 +148,7 @@ app.post('/polls/:STRING/vote', passDb, function(req, res) {
     var str = req.params.STRING;
     var vote = req.body;
     
-    var key = req.body.choice;
+    var key = vote.choice;
     var voteObj = {};
     voteObj[key] = 1;
     voteObj.totalVotes = 1;
@@ -162,6 +162,9 @@ app.post('/polls/:STRING/vote', passDb, function(req, res) {
         $push: {
             hasVoted: {
                 $each: [req.headers['x-forwarded-for']]
+            },
+            choices: {
+                $each: [vote.newOption]
             }
         }
     }, function(err) {

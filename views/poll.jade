@@ -9,7 +9,7 @@ html
     
         div#main.container
             h1.createH1= poll.title
-            p Choose from the options below.
+            p Choose from the options below or add your own.
             form.voteForm(action=poll.url+'/vote', method='post')
                 div.form-group.row
                     label.col-sm-12.form-control-label.text-center Options

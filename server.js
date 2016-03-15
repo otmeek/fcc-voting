@@ -7,6 +7,10 @@ var randomstring = require('randomstring');
 var bodyParser   = require('body-parser');
 var os           = require('os');
 var ifaces       = os.networkInterfaces();
+var passport     = require('passport');
+var GitHubStrategy = require('passport-github').Strategy;
+var cookieParser = require('cookie-parser');
+var session = require('express-session')
 
 var app = express();
 var db;
@@ -36,6 +40,49 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 }));
 app.use(bodyParser.json())
 app.set('view engine', 'jade');
+app.use(session({
+  secret: 'keyboard cat'
+}))
+app.use(passport.initialize());
+app.use(cookieParser());
+app.use(passport.session());
+passport.serializeUser(function(user, done) {
+  done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+    var users = db.collection('users');
+  users.find({
+        id: id
+    }).toArray(function(err, docs) {
+      done(err, docs[0]);
+  });
+});
+passport.use(new GitHubStrategy({
+    clientID: process.env.GITHUB_CLIENT_ID,
+    clientSecret: process.env.GITHUB_CLIENT_SECRET,
+    callbackURL: "http://localhost:8080/auth/github/callback"
+  },
+  function(accessToken, refreshToken, profile, cb) {
+    var users = db.collection('users');
+    
+    // find user
+    users.find({
+        id: profile.id
+    }).toArray(function(err, docs) {
+        if(docs.length===0) {
+            users.insert({
+                id: profile.id
+            }, function(err, record) {
+                return cb(err, record[0]);
+            });
+        }
+        else {
+            return cb(err, docs[0]);
+        }
+    })
+  }
+));
 
 app.get('/', passDb, function(req, res) {
     
@@ -52,10 +99,24 @@ app.get('/', passDb, function(req, res) {
     });
 });
 
+app.get('/auth/github', passport.authenticate('github'));
+
+app.get('/auth/github/callback', passport.authenticate('github', {
+    failureRedirect: '/login'
+}), function(req, res) {
+    res.redirect('/');
+});
+
+app.get('/signin', function(req, res) {
+    res.render('login');
+})
+
 app.get('/polls/create', function(req, res) {
     var obj = {
         currentPage: 'Create'
     }
+    
+    console.log(req.user);
     res.render('create', obj);
 });
 
@@ -156,6 +217,7 @@ app.get('/polls/:STRING/vote', passDb, function(req, res) {
 app.post('/polls/:STRING/vote', passDb, function(req, res) {
     var str = req.params.STRING;
     var vote = req.body;
+    var ip = req.headers['x-forwarded-for'];
     console.log(vote);
     
     var key = vote.choice;
@@ -172,7 +234,7 @@ app.post('/polls/:STRING/vote', passDb, function(req, res) {
         console.log(vote.hasOwnProperty('newOption'));
         pushObj = {
             hasVoted: {
-                $each: [req.headers['x-forwarded-for']]
+                $each: [ip]
             },
             choices: {
                 $each: [vote.newOption]
@@ -181,15 +243,31 @@ app.post('/polls/:STRING/vote', passDb, function(req, res) {
     }
     
     var collection = req.db.collection('polls');
-    collection.update({
-        url: '/polls/' + str
-    }, {
-        $inc: voteObj,
-        $push: pushObj
-    }, function(err) {
+    
+    collection.find({
+        url: '/polls/' + str,
+        hasVoted: {
+            $in: [ip]
+        }
+    }).toArray(function(err, docs) {
         if(err) throw err;
-        // redirect to results page
-        res.redirect('/polls/' + str + '/results');
+        if(docs.length>0) {
+            // redirect to results page
+            res.redirect('/polls/' + str + '/results');
+        }
+        else {
+            collection.update({
+                url: '/polls/' + str
+            }, {
+                $inc: voteObj,
+                $push: pushObj
+            }, function(err) {
+                if(err) throw err;
+                // redirect to results page
+                res.redirect('/polls/' + str + '/results');
+            });
+        }
+
     });
 
     

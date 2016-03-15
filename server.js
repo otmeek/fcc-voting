@@ -60,16 +60,24 @@ app.get('/polls/create', function(req, res) {
 });
 
 app.post('/polls/create', passDb, function(req, res) {
+    var poll = req.body;
+
+    for (var p in poll) {
+      if (poll[p] === null || poll[p] === '') {
+        delete poll[p];
+      }
+    }
+         
     var doc = {
-        title: req.body.title,
+        title: poll.title,
         totalVotes: 0,
         hasVoted: []
     };
     var choices = [];
-    for (var prop in req.body) {
-        if (req.body.hasOwnProperty(prop)) {
-            if (prop.substr(0, 6) == 'choice' && req.body[prop] != '') {
-                choices.push(req.body[prop])
+    for (var prop in poll) {
+        if (poll.hasOwnProperty(prop)) {
+            if (prop.substr(0, 6) == 'choice' && poll[prop] != '') {
+                choices.push(poll[prop])
             }
         }
     }

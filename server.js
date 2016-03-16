@@ -13,13 +13,7 @@ var morgan       = require('morgan');
 var cookieParser = require('cookie-parser');
 var session      = require('express-session');
 
-var mongoose     = require('mongoose');
-mongoose.connect(process.env.MONGOLAB_URI);
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function() {
-    // this works, maybe
-});
+var configDB     = require('./config/database.js');
 
 var app = express();
 
@@ -50,8 +44,24 @@ initPassport(passport);
 
 app.set('view engine', 'jade');
 
+var db;
 
-require('./app/routes/index.js')(app, passport);
+var passDb = function(req, res, next) {
+	if (!db) {
+		mongo.connect(process.env.MONGOLAB_URI, function(err, database) {
+			if (err) throw err;
+			db = database;
+
+			req.db = db;
+		  next();
+		});
+	} else {
+	  req.db = db;
+	  next();
+	}
+}
+
+require('./app/routes/index.js')(app, passport, passDb);
 
 var port = process.env.PORT || 8080;
 app.listen(port,  function () {

@@ -1,6 +1,17 @@
 'use strict';
 
 var randomstring = require('randomstring');
+var bcrypt       = require('bcrypt-nodejs');
+
+var isAuthenticated = function (req, res, next) {
+	// if user is authenticated in the session, call the next() to call the next request handler 
+	// Passport adds this method to request object. A middleware is allowed to add properties to
+	// request and response objects
+	if (req.isAuthenticated())
+		return next();
+	// if the user is not authenticated then redirect him to the login page
+	res.redirect('/');
+}
 
 module.exports = function(app, passport, passDb) {     
 
@@ -21,21 +32,55 @@ module.exports = function(app, passport, passDb) {
 
     app.get('/signin', function(req, res) {
         var obj = {
-            currentPage: 'Signin'
+            currentPage: 'Signin',
+            message    : req.flash('message')
         }
         res.render('signin', obj);
     });
+    
+    app.post('/signin', passport.authenticate('login', {
+        successRedirect: '/profile',
+        failureRedirect: '/signin',
+        failureFlash   : true
+    }));
 
     app.get('/signup', function(req, res) {
         var obj = {
-            currentPage: 'Signup'
+            currentPage: 'Signup',
+            message    : req.flash('loginMessage')
         }
         res.render('signup', obj);
     });
-
-    app.get('/user/:USERNAME', function(req, res) {
-        // check that user is logged in?
+    
+    var createHash = function(password){
+        return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
+    }
+    
+    app.post('/signup', passDb, function(req, res) {
+        var username = req.body.username;
+        var password = req.body.password;
+        
+        var collection = req.db.collection('users');
+        collection.insert({
+            username: username,
+            password: createHash(password)
+        }, function(err) {
+            if(err) throw err;
+            res.redirect('/signin');
+        });
+        
     });
+        
+    app.get('/profile', function(req, res) {
+        res.render('profile', {
+            user: 'req.user'
+        });
+    });
+    
+    app.get('/logout', function(req, res) {
+        req.logout();
+        res.redirect('/');
+    })
 
     app.get('/polls/create', function(req, res) {
         var obj = {

@@ -26,7 +26,7 @@ app.use('/polls/:STRING', express.static(__dirname + '/public'));
 app.use(bodyParser.urlencoded({     
     extended: false
 }));
-app.use(bodyParser.json())
+app.use(bodyParser.json());
 app.use(morgan('dev'));
 app.use(cookieParser());
 app.use(session({
@@ -37,6 +37,10 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 app.use(flash()); // use connect-flash for flash messages stored in session
+
+// Initialize Passport
+var initPassport = require('./passport/init');
+initPassport(passport);
 
 app.set('view engine', 'jade');
 

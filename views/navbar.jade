@@ -25,7 +25,10 @@ nav.navbar.navbar-inverse.navbar-fixed-top(role='navigation')
                                 a(href='/signup') Sign up
                             li.divider
                             li
-                                a(href='#') My polls
+                                a(href='/profile') User profile
+                            li.divider
+                            li
+                                a(href='#') Sign out
                 else
                     li.dropdown
                         a.dropdown-toggle(href='#', data-toggle='dropdown', role='button', aria-haspopup='true', aria-expanded='false') User 
@@ -37,7 +40,10 @@ nav.navbar.navbar-inverse.navbar-fixed-top(role='navigation')
                                 a(href='/signup') Sign up
                             li.divider
                             li
-                                a(href='#') My polls
+                                a(href='/profile') User profile
+                            li.divider
+                            li
+                                a(href='#') Sign out
                 if currentPage === 'Create'
                     li.active
                         a(href='/polls/create') Create

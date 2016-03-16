@@ -2,6 +2,8 @@
 
 var randomstring = require('randomstring');
 var bcrypt       = require('bcrypt-nodejs');
+var Poll         = require('../models/poll');
+var User         = require('../models/user');
 
 var isAuthenticated = function (req, res, next) {
 	// if user is authenticated in the session, call the next() to call the next request handler 
@@ -13,13 +15,13 @@ var isAuthenticated = function (req, res, next) {
 	res.redirect('/');
 }
 
-module.exports = function(app, passport, passDb) {     
+module.exports = function(app, passport, db) {     
 
-    app.get('/', passDb, function(req, res) {
+    app.get('/', function(req, res) {
 
         var polls = {};
 
-        var collection = req.db.collection('polls');
+        var collection = db.collection('polls');
         var data = collection.find().sort({
             _id: -1
         }).limit(50).toArray(function(err, docs) {
@@ -56,18 +58,26 @@ module.exports = function(app, passport, passDb) {
 //        return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
 //    }
     
-    app.post('/signup', passDb, function(req, res) {
+    app.post('/signup', function(req, res) {
         var username = req.body.username;
         var password = req.body.password;
         
-        var collection = req.db.collection('users');
-        collection.insert({
+//        collection.insert({
+//            username: username,
+//            password: createHash(password)
+//        }, function(err) {
+//            if(err) throw err;
+//            res.redirect('/signin');
+//        });
+        var newUser = new User({
             username: username,
-            password: createHash(password)
-        }, function(err) {
-            if(err) throw err;
-            res.redirect('/signin');
+            password: password
         });
+        
+        newUser.save(function(err, user) {
+            if (err) throw err;
+            res.redirect('/signin');
+        })
         
     });
         
@@ -89,7 +99,7 @@ module.exports = function(app, passport, passDb) {
         res.render('create', obj);
     });
 
-    app.post('/polls/create', passDb, function(req, res) {
+    app.post('/polls/create', function(req, res) {
         var poll = req.body;
 
         for (var p in poll) {
@@ -115,7 +125,7 @@ module.exports = function(app, passport, passDb) {
 
         doc.choices = choices;
 
-        var collection = req.db.collection('polls');
+        var collection = db.collection('polls');
 
         function getNewUrl() {
             // generate new URL
@@ -152,11 +162,11 @@ module.exports = function(app, passport, passDb) {
         res.redirect('/polls/' + str + '/vote');
     });
 
-    app.get('/polls/:STRING/vote', passDb, function(req, res) {
+    app.get('/polls/:STRING/vote', function(req, res) {
         var str = req.params.STRING;
 
 
-        var collection = req.db.collection('polls');
+        var collection = db.collection('polls');
 
 
         // if user has voted, redirect to results page
@@ -188,10 +198,10 @@ module.exports = function(app, passport, passDb) {
 
     });
 
-    app.post('/polls/:STRING/vote', passDb, function(req, res) {
+    app.post('/polls/:STRING/vote', function(req, res) {
         var str = req.params.STRING;
         var vote = req.body;
-        var collection = req.db.collection('polls');
+        var collection = db.collection('polls');
         if(JSON.stringify(vote) === JSON.stringify({})) {
             
             collection.find({
@@ -245,11 +255,11 @@ module.exports = function(app, passport, passDb) {
 
     });
 
-    app.get('/polls/:STRING/results', passDb, function(req, res) {
+    app.get('/polls/:STRING/results', function(req, res) {
         var str = req.params.STRING;
         var obj = {};
 
-        var collection = req.db.collection('polls');
+        var collection = db.collection('polls');
         collection.find({
             url: '/polls/' + str
         }).toArray(function(err, doc) {
@@ -259,10 +269,10 @@ module.exports = function(app, passport, passDb) {
 
     });
 
-    app.get('/data', passDb, function(req, res) {
+    app.get('/data', function(req, res) {
         var query = req.query;
 
-        var collection = req.db.collection('polls');
+        var collection = db.collection('polls');
         collection.find({
             url: query.url
         }).toArray(function(err, doc) {

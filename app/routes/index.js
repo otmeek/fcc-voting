@@ -52,9 +52,9 @@ module.exports = function(app, passport, passDb) {
         res.render('signup', obj);
     });
     
-    var createHash = function(password){
-        return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
-    }
+//    var createHash = function(password){
+//        return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
+//    }
     
     app.post('/signup', passDb, function(req, res) {
         var username = req.body.username;

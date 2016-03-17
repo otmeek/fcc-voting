@@ -82,6 +82,9 @@ module.exports = function(app, passport) {
             Poll.find({
                 hasVoted: {
                     $in: [req.user.username]
+                },
+                createdBy: {
+                    $ne: req.user.username
                 }
             }).lean().exec(function(err, polls) {
                 if(err) throw err;

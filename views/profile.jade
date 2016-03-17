@@ -8,6 +8,19 @@ html
         include ./navbar.jade
     
         div#main.container
-            h1.createH1= user  
+            h1.createH1
+                | Welcome, 
+                = user  
+                |  !
+            a#btnSignOut.btn.btn-danger.btn-lg(href='/signout') Sign out
+            h3 Your created polls
+            div.list-group
+                each poll in createdPolls
+                    a.list-group-item(href=poll.url + '/vote')= poll.title
+                
+            h3 Your voted polls
+            div.list-group
+                each poll in votedPolls
+                    a.list-group-item(href=poll.url + '/vote')= poll.title
 
         include ./scripts.jade

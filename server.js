@@ -15,8 +15,6 @@ var mongoose     = require('mongoose');
 var bcrypt       = require('bcrypt-nodejs');
 var randomstring = require('randomstring');
 
-var DBconfig     = require('./config/database');
-
 require('dotenv').load();
 
 mongoose.connect(process.env.MONGOLAB_URI);

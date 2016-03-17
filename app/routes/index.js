@@ -37,7 +37,7 @@ module.exports = function(app, passport) {
     });
     
     app.post('/signin', passport.authenticate('login', {
-        successRedirect: '/polls/create',
+        successRedirect: '/profile',
         failureRedirect: '/signin',
         failureFlash   : true
     }));
@@ -58,13 +58,39 @@ module.exports = function(app, passport) {
     
     app.get('/signout', function(req, res) {
         req.logout();
-        res.redirect('/');
+        res.redirect('/signedout');
+    });
+    
+    app.get('/signedout', function(req, res) {
+        res.render('signedout');
     });
 
     app.get('/profile', isAuthenticated, function(req, res) {
-        res.render('profile', {
+        // list every poll created by user
+        // list every poll the user has voted on
+        
+        var obj = {
             user: req.user.username
+        };
+        
+        Poll.find({
+            createdBy: req.user.username
+        }).lean().exec(function(err, polls) {
+            if(err) throw err;
+            obj.createdPolls = polls;
+            
+            Poll.find({
+                hasVoted: {
+                    $in: [req.user.username]
+                }
+            }).lean().exec(function(err, polls) {
+                if(err) throw err;
+                obj.votedPolls = polls;
+                res.render('profile', obj);
+            });
         });
+        
+
     });
 
     app.get('/polls/create', isAuthenticated, function(req, res) {
@@ -74,7 +100,7 @@ module.exports = function(app, passport) {
         res.render('create', obj);
     });
 
-    app.post('/polls/create', function(req, res) {
+    app.post('/polls/create', isAuthenticated, function(req, res) {
         var poll = req.body;
 
         for (var p in poll) {
@@ -86,13 +112,13 @@ module.exports = function(app, passport) {
         var doc = new Poll({
             title: poll.title,
             totalVotes: 0,
-            hasVoted: []
+            hasVoted: [],
+            createdBy: req.user.username
         });
         var choices = [];
         for (var prop in poll) {
             if (poll.hasOwnProperty(prop)) {
                 if (prop.substr(0, 6) == 'choice' && poll[prop] != '') {
-                    console.log(poll[prop])
                     choices.push(poll[prop])
                 }
             }
@@ -103,14 +129,6 @@ module.exports = function(app, passport) {
         function getNewUrl() {
             // generate new URL
             var urlStr = randomstring.generate(10);
-            // check if url already exists
-    //        collection.find({
-    //            url: '/polls/' + urlStr
-    //        }).toArray(function(err, docs) {
-    //            if(err) throw err;
-    //            if(docs.length > 0)
-    //                getNewUrl();
-    //        });
 
             Poll.find({
                 url: '/polls/' + urlStr
@@ -124,17 +142,6 @@ module.exports = function(app, passport) {
         }
 
         doc.url = '/polls/' + getNewUrl();
-
-    //    collection.insert(doc, function(err) {
-    //        if(err) throw err;
-    //        var obj = {
-    //            pollSubmitted: true,
-    //            poll: {
-    //                url: process.env.APP_URL + doc.url.substr(1)
-    //            }
-    //        }
-    //        res.render('create', obj);
-    //    });
 
         doc.save(function(err, poll) {
             if(err) throw err;
@@ -158,26 +165,53 @@ module.exports = function(app, passport) {
     app.get('/polls/:STRING/vote', function(req, res) {
         var str = req.params.STRING;
 
-
-        //var collection = req.db.collection('polls');
-
-
         // if user has voted, redirect to results page
+        
+        // get ip
         var ip = [req.headers['x-forwarded-for']];
+        // get username if user is logged on
+        var username = null;
+        if (req.user != undefined) {
+            username = req.user.username;
+        }
 
-        Poll.find({
-            url: '/polls/' + str,
-            hasVoted : {
-                $in: ip
-            }
-        }).lean().exec(function(err, polls) {
-                if(err) throw err;
-                if(polls.length > 0) {
-                    // redirect to results page
-                    res.redirect('/polls/' + str + '/results');
+        if(username == null) {
+            Poll.find({
+                url: '/polls/' + str,
+                hasVoted : {
+                    $in: ip
                 }
+            }).lean().exec(function(err, polls) {
+                    if(err) throw err;
+                    if(polls.length > 0) {
+                        // redirect to results page
+                        res.redirect('/polls/' + str + '/results');
+                    }
+                    else {
+                        // user hasnt voted, render vote page
+                        Poll.find({
+                            url: '/polls/' + str
+                        }).lean().exec(function(err, docs) {
+                            if(err) throw err;
+                            var obj = {
+                                poll: docs[0]
+                            };
+                            res.render('poll', obj);
+                        })
+                    }
+            });
+        }
+        else {
+            Poll.find({
+                url: '/polls/' + str,
+                hasVoted: {
+                    $in: [username]
+                }
+            }).lean().exec(function(err, poll) {
+                if(err) throw err;
+                if(poll.length > 0)
+                    res.redirect('/polls/' + str + '/results');
                 else {
-                    // user hasnt voted, render vote page
                     Poll.find({
                         url: '/polls/' + str
                     }).lean().exec(function(err, docs) {
@@ -188,31 +222,9 @@ module.exports = function(app, passport) {
                         res.render('poll', obj);
                     })
                 }
-        });
-    //    collection.find({
-    //        url: '/polls/' + str,
-    //        hasVoted: {
-    //            $in: ip
-    //        }
-    //    }).toArray(function(err, docs) {
-    //        if(err) throw err;
-    //        if(docs.length>0) {
-    //            // redirect to results page
-    //            res.redirect('/polls/' + str + '/results');
-    //        }
-    //        else {
-    //            // user hasnt voted, render vote page
-    //            collection.find({
-    //                url: /polls/ + str
-    //            }).toArray(function(err, docs) {
-    //                if(err) throw err;
-    //                var obj = {
-    //                    poll: docs[0]
-    //                };
-    //                res.render('poll', obj);
-    //            });
-    //        }
-    //    });
+                    
+            });
+        }
 
     });
 
@@ -220,18 +232,12 @@ module.exports = function(app, passport) {
         var str = req.params.STRING;
         var vote = req.body;
 
+        var username = null;
+        if (req.user != undefined) {
+            username = req.user.username;
+        }
+        
         if(JSON.stringify(vote) === JSON.stringify({})) {
-
-    //        collection.find({
-    //                url: /polls/ + str
-    //            }).toArray(function(err, docs) {
-    //                if(err) throw err;
-    //                var obj = {
-    //                    poll: docs[0],
-    //                    voteFailed: true
-    //                };
-    //                res.render('poll', obj);
-    //            });
 
             // user has submitted empty vote
             Poll.find({
@@ -247,24 +253,30 @@ module.exports = function(app, passport) {
 
         }
         else {
-
+            
             var key = vote.choice;
             var voteObj = {};
             voteObj[key] = 1;
             voteObj.totalVotes = 1;
-            var pushObj = {
-                hasVoted: {
-                    $each: [req.headers['x-forwarded-for']]
-                }
-            }
-
-            if(vote.hasOwnProperty('newOption')) {
-                console.log(vote.hasOwnProperty('newOption'));
-                pushObj = {
+            
+            if(username == null) {
+                var pushObj = {
                     hasVoted: {
                         $each: [req.headers['x-forwarded-for']]
-                    },
-                    choices: {
+                    }
+                }
+
+            }
+            else {
+                var pushObj = {
+                    hasVoted: {
+                        $each: [username]
+                    }
+                }
+            }
+            
+            if(vote.hasOwnProperty('newOption')) {
+                pushObj.choices = {
                         $each: [vote.newOption]
                     }
                 }
@@ -280,7 +292,6 @@ module.exports = function(app, passport) {
                 // redirect to results page
                 res.redirect('/polls/' + str + '/results');
             });
-        }
 
 
     });

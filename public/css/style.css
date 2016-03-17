@@ -93,6 +93,7 @@ h1, h2, h3, h4 {
     width: 40%;
     margin: 50px auto;
     text-align: left;
+    word-wrap: break-word;
 }
 
 .voteForm label {
@@ -170,4 +171,21 @@ form button {
 .btn-social {
     width: 300px;
     margin: 10px auto;
+}
+
+#signout {
+    height: 50%;
+    width: 50%;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    margin: auto;
+    text-align: center;
+}
+
+#btnSignOut {
+    width: 200px;
+    margin-top: 10px;
 }

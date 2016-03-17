@@ -19,7 +19,8 @@ var pollSchema = mongoose.Schema({
     choice6: Number,
     choice7: Number,
     choice8: Number,
-    choice9: Number
+    choice9: Number,
+    createdBy: String
     
     
 }, {

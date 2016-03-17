@@ -10,11 +10,7 @@ module.exports = function(passport) {
     passport.use('login', new LocalStrategy({
         passReqToCallback : true
     },
-    function(req, username, password, done) {
-        
-        var isValidPassword = function(user, password) {
-            return bcrypt.compareSync(password, user.password);
-        }  
+    function(req, username, password, done) { 
         
         User.findOne({ 'username' : username }, function(err, user) {
             if (err) return done(err);
@@ -25,7 +21,7 @@ module.exports = function(passport) {
                 return done(null, false, req.flash('message', 'The entered username is invalid.'));
             }
             if(!isValidPassword(user, password)) {
-                console.log('Invalid password');
+                console.log('The entered password is invalid.');
                 return done(null, false, req.flash('message', 'Invalid password.'));
             }
             
@@ -35,5 +31,9 @@ module.exports = function(passport) {
 
         
     }));
+    
+    var isValidPassword = function(user, password) {
+        return bcrypt.compareSync(password, user.password);
+    } 
     
 }

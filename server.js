@@ -1,7 +1,6 @@
 'use strict';
 
 var express      = require('express');
-var mongo        = require('mongodb').MongoClient;
 var path         = require('path');
 var bodyParser   = require('body-parser');
 var os           = require('os');
@@ -12,12 +11,22 @@ var flash        = require('connect-flash');
 var morgan       = require('morgan');
 var cookieParser = require('cookie-parser');
 var session      = require('express-session');
+var mongoose     = require('mongoose');
+var bcrypt       = require('bcrypt-nodejs');
+var randomstring = require('randomstring');
 
-var configDB     = require('./config/database.js');
-
-var app = express();
+var DBconfig     = require('./config/database');
 
 require('dotenv').load();
+
+mongoose.connect(process.env.MONGOLAB_URI);
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function() {
+  // we're connected!
+});
+
+var app = express();
 
 app.use(express.static(__dirname + '/public'));
 app.use('/polls', express.static(__dirname + '/public'));
@@ -30,7 +39,7 @@ app.use(bodyParser.json());
 app.use(morgan('dev'));
 app.use(cookieParser());
 app.use(session({
-    secret: 'everysinglecatiscute',
+    secret: process.env.SESSION_SECRET,
     resave: true,
     saveUninitialized: true
 }));
@@ -44,24 +53,7 @@ initPassport(passport);
 
 app.set('view engine', 'jade');
 
-var db;
-
-var passDb = function(req, res, next) {
-	if (!db) {
-		mongo.connect(process.env.MONGOLAB_URI, function(err, database) {
-			if (err) throw err;
-			db = database;
-
-			req.db = db;
-		  next();
-		});
-	} else {
-	  req.db = db;
-	  next();
-	}
-}
-
-require('./app/routes/index.js')(app, passport, passDb);
+require('./app/routes/index.js')(app, passport)
 
 var port = process.env.PORT || 8080;
 app.listen(port,  function () {

@@ -22,6 +22,8 @@ var pollSchema = mongoose.Schema({
     choice9: Number
     
     
+}, {
+    timestamps: true
 });
 
 // create the model for users and export to app

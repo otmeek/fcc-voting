@@ -17,7 +17,9 @@ var randomstring = require('randomstring');
 
 var DBconfig     = require('./config/database');
 
-mongoose.connect(DBconfig.url);
+require('dotenv').load();
+
+mongoose.connect(process.env.MONGOLAB_URI);
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
@@ -25,8 +27,6 @@ db.once('open', function() {
 });
 
 var app = express();
-
-require('dotenv').load();
 
 app.use(express.static(__dirname + '/public'));
 app.use('/polls', express.static(__dirname + '/public'));
@@ -39,7 +39,7 @@ app.use(bodyParser.json());
 app.use(morgan('dev'));
 app.use(cookieParser());
 app.use(session({
-    secret: 'everysinglecatiscute',
+    secret: process.env.SESSION_SECRET,
     resave: true,
     saveUninitialized: true
 }));

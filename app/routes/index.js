@@ -1,7 +1,6 @@
 'use strict';
 
 var randomstring = require('randomstring');
-var bcrypt       = require('bcrypt-nodejs');
 var Poll         = require('../models/poll');
 var User         = require('../models/user');
 
@@ -12,26 +11,16 @@ var isAuthenticated = function (req, res, next) {
 	if (req.isAuthenticated())
 		return next();
 	// if the user is not authenticated then redirect him to the login page
-	res.redirect('/');
+	res.redirect('/signin');
 }
 
-module.exports = function(app, passport) {     
+module.exports = function(app, passport) {    
 
     app.get('/', function(req, res) {
 
         var polls = {};
 
-    //    var collection = req.db.collection('polls');
-    //    var data = collection.find().sort({
-    //        _id: -1
-    //    }).limit(50).toArray(function(err, docs) {
-    //        if(err) throw err;
-    //        polls.data = docs;
-    //        polls.currentPage = 'Home'
-    //        res.render('index', polls);
-    //    });
-
-        Poll.find().sort({ _id: 'descending'}).limit(50).exec(function(err, polls) {
+        Poll.find().sort({ createdAt: 'descending'}).limit(50).exec(function(err, polls) {
             if(err) throw err;
             polls.data = polls;
             polls.currentPage = 'Home';
@@ -46,9 +35,9 @@ module.exports = function(app, passport) {
         }
         res.render('signin', obj);
     });
-
+    
     app.post('/signin', passport.authenticate('login', {
-        successRedirect: '/profile',
+        successRedirect: '/polls/create',
         failureRedirect: '/signin',
         failureFlash   : true
     }));
@@ -56,52 +45,29 @@ module.exports = function(app, passport) {
     app.get('/signup', function(req, res) {
         var obj = {
             currentPage: 'Signup',
-            message    : req.flash('loginMessage')
+            message    : req.flash('message')
         }
         res.render('signup', obj);
     });
-
-    var createHash = function(password){
-        return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
-    }
-
-    app.post('/signup', function(req, res) {
-        var username = req.body.username;
-        var password = req.body.password;
-
-    //    var collection = req.db.collection('users');
-    //    collection.insert({
-    //        username: username,
-    //        password: createHash(password)
-    //    }, function(err) {
-    //        if(err) throw err;
-    //        res.redirect('/signin');
-    //    });
-
-        var newUser = new User({
-            username: username,
-            password: createHash(password)
-        });
-
-        newUser.save(function(err, user) {
-            if(err) throw err;
-            res.redirect('/signin');
-        });
-
-    });
-
-    app.get('/profile', function(req, res) {
-        res.render('profile', {
-            user: 'req.user'
-        });
-    });
-
-    app.get('/logout', function(req, res) {
+    
+    app.post('/signup', passport.authenticate('signup', {
+        successRedirect: '/polls/create',
+        failureRedirect: '/signup',
+        failureFlash   : true
+    }));
+    
+    app.get('/signout', function(req, res) {
         req.logout();
         res.redirect('/');
-    })
+    });
 
-    app.get('/polls/create', function(req, res) {
+    app.get('/profile', isAuthenticated, function(req, res) {
+        res.render('profile', {
+            user: req.user.username
+        });
+    });
+
+    app.get('/polls/create', isAuthenticated, function(req, res) {
         var obj = {
             currentPage: 'Create'
         }

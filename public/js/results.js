@@ -31,8 +31,10 @@ $(document).ready(function() {
     var options = {
         scaleFontFamily: "''Open Sans', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
         responsive: true,
-        maintainAspectRatio: true
+        maintainAspectRatio: true,
+        animationSteps: 50,
+        animationEasing: "easeOutQuart"
     }
     
-    var myPieChart = new Chart(ctx).Pie(data);
+    var myPieChart = new Chart(ctx).Pie(data, options);
 });

@@ -17,7 +17,7 @@ function addCustomOption() {
     $('#addCustom').hide();
     var customOption =
         '<div id="customOption" class="col-xs-12">' +
-            '<input name="newOption" id="inputNewChoice" class="form-control" type="text" placeholder="Your custom option" />' +
+            '<input name="newOption" id="inputNewChoice" maxlength="130" class="form-control" type="text" placeholder="Your custom option" />' +
             '<span class="pull-right">' +
                 '<span id="customConfirm"><a href="#">Add</a></span> ' +
                 '<span id="customCancel"><a href="#">Cancel</a></span>' +

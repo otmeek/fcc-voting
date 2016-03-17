@@ -29,6 +29,9 @@ module.exports = function(app, passport) {
     });
 
     app.get('/signin', function(req, res) {
+        if(req.user != undefined) {
+            res.redirect('/profile');
+        }
         var obj = {
             currentPage: 'Signin',
             message    : req.flash('message')
@@ -43,6 +46,9 @@ module.exports = function(app, passport) {
     }));
 
     app.get('/signup', function(req, res) {
+        if(req.user != undefined) {
+            res.redirect('/profile');
+        }
         var obj = {
             currentPage: 'Signup',
             message    : req.flash('message')
